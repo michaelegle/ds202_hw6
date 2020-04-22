@@ -1,3 +1,10 @@
+---
+title: "DS 202 HW 6"
+author: "Michael Egle | github: michaelegle"
+date: "4/20/2020"
+output: html_document
+---
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
@@ -88,7 +95,23 @@ dogs %>%
   geom_vline(xintercept = mean_score) +
   geom_hline(yintercept = -mean_pop) +
   geom_text(mapping = aes(label = `Dog breed`), label.size = 10, check_overlap = TRUE) +
-  scale_size_manual(values = c(5, 4, 3))
+  scale_size_manual(values = c(5, 4, 3)) +
+  scale_alpha_continuous(range = c(.3, 1)) +
+  theme(axis.text.y = element_blank(),
+        axis.text.x = element_blank(),
+        axis.ticks = element_blank(),
+        axis.title = element_blank(),
+        line = element_blank()) +
+  labs(title = "Best in Show: The Ultimate Data Dog",
+       caption = "source American Kennel Club") +
+  annotate(geom = "text", x = 1.5, y = 10, label = "Inexplicably Overrated", size = 3) +
+  annotate(geom = "text", x = 1.5, y = -150, label = "The Rightly Ignored", size = 3) +
+  annotate(geom = "text", x = 3.5, y = 0, label = "Hot Dogs!", size = 3) +
+  annotate(geom = "text", x = 3.5, y = -150, label = "Overlooked Treasures", size = 3) +
+  annotate(geom = "label", x = mean_score, y = 15, label = "Popularity", size = 3, 
+           fill = "lightgray") +
+  annotate(geom = "label", x = 1.4, y = -mean_pop, label = "Our Data Score", size = 3,
+           fill = "lightgray")
 ```
 
 
