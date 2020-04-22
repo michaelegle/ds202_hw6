@@ -1,0 +1,100 @@
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Top dogs
+
+In this homework, you will try to reproduce the fantastic infographic for [top dogs](https://informationisbeautiful.net/visualizations/best-in-show-whats-the-top-data-dog/), originally produced by David McCandless. The raw data can be found [here](https://docs.google.com/spreadsheets/d/1l_HfF5EaN-QgnLc2UYdCc7L2CVrk0p3VdGB1godOyhk/edit#gid=10). You can download this file by File -- Download As -- Microsoft Excel (.xlsx).
+
+**Submission instructions**: Create a folder named `ds202_hw6`, and name the RMarkDown file including your solutions `hw6.Rmd` under this folder. For the submission, create a GitHub repository named `ds202_hw6` under your GitHub account, and push both `hw6.Rmd` and the knitted `hw6.html` before the deadline. I will assume you use the same GitHub username as for your HW5 submission. The latest version of your homework appearing on GitHub before the deadline is graded. *It is crucial to follow the exact folder structure and file names*, so that your homework can be reproduced and graded by an automated script. This homework is **due on April 22** before class.
+
+1. Import the data and clean appropriately. To read in the data, you can use `readxl::read_xlsx('fileNameHere', sheet='sheetNameHere')`. Required data are in the sheets `Best in show` and `Best in show full sheet`. Take extra care on the column names and the first few rows of the data frame after read in.
+
+```{r}
+library(tidyverse)
+```
+
+
+```{r}
+dogs <- readxl::read_xlsx('ds202_dawgs.xlsx', 'Best in show full sheet')
+```
+
+```{r}
+colnames(dogs) <- as.character(unlist(dogs[3, ]))
+dogs = dogs[-(1:3), ]
+```
+
+Got rid of the ugly part above what was supposed to be the header, now let's get rid of the columns we aren't interested in.
+
+```{r}
+colnames(dogs)[3] <- "group"
+colnames(dogs)[5] <- "data score"
+colnames(dogs)[6] <- "popularity"
+colnames(dogs)[12] <- "intelligence"
+colnames(dogs)[32] <- "size"
+```
+
+
+
+```{r}
+dogs <- dogs[, !duplicated(colnames(dogs))]
+#  select(c(`Dog breed`, `data score`, `popularity`, `intelligence`, `size`, `group`))
+```
+
+```{r}
+colnames(dogs)[2] <- "col2"
+dogs <- dogs %>%
+  select(`Dog breed`, `data score`, `popularity`, `intelligence`, `size`, `group`)
+```
+
+```{r}
+dogs <- dogs %>%
+  mutate_at(.vars = vars(`data score`, `popularity`, `intelligence`),
+            .funs = funs(as.numeric))
+```
+```{r}
+
+dogs <- dogs %>%
+  mutate(size = as.factor(size),
+         group = as.factor(group))
+```
+
+
+Data is all cleaned and filtered
+
+2. Create a graphics similar to the  [top dogs](https://informationisbeautiful.net/visualizations/best-in-show-whats-the-top-data-dog/) figure. Your figure needs to display the following information with appropriate plotting elements:
+
+- breed of dog X
+- type of dog (work, toy, etc.) X
+- size of dog X 
+- data score X
+- popularity X
+- intelligence of the dog X
+- appropriate legends & explanation
+
+```{r}
+dogs <- dogs %>%
+  filter(!is.na(`data score`), !is.na(popularity))
+
+mean_pop <- mean(dogs$popularity)
+mean_score <- mean(dogs$`data score`)
+```
+
+```{r}
+dogs %>%
+  ggplot(aes(x = `data score`, y = -popularity, color = group, size = size,
+             label = `Dog breed`, alpha = intelligence)) +
+  geom_point() +
+  geom_vline(xintercept = mean_score) +
+  geom_hline(yintercept = -mean_pop) +
+  geom_text(mapping = aes(label = `Dog breed`), label.size = 10, check_overlap = TRUE) +
+  scale_size_manual(values = c(5, 4, 3))
+```
+
+
+Hints and Notes:
+
+- The breed of dog can be displayed without the silhouttes (text only is fine)
+- Avoid (too much) overlaps!
+- Choose a good color scheme.
+- Your submission is supposed to be fully reproducible, i.e. the TA and I will 'knit' your submission in RStudio. 
